@@ -1,6 +1,13 @@
 import _ from 'lodash'
 
-export const precision = (value, decimals = 6) =>
+const getDecimals = (value) => {
+  if (value < 1) return 6
+  if (value < 1000) return 2
+  if (value < 10000) return 1
+  return 0
+}
+
+export const precision = (value, decimals = getDecimals(value)) =>
   Math.floor(value * 10 ** decimals) / 10 ** decimals
 
 const getCost = (p, a) => precision(p * a)
@@ -58,22 +65,10 @@ export const getSettingsColumns = () => [
   {
     name: 'price',
     title: 'Price',
-    getCellValue: row => getPercentPrice(row.entryPrice, row.pricePercent),
+    getCellValue: (row) => getPercentPrice(row.entryPrice, row.pricePercent),
   },
   { name: 'xPrice', title: 'x Price' },
-  { name: 'xPositionAmount', title: 'x Position Amount' },
   { name: 'xAmount', title: 'x Amount' },
-]
-
-export const getPositionColumns = () => [
-  { name: 'price', title: 'Pos Price' },
-  { name: 'amount', title: 'Pos Amount' },
-  { name: 'pc', title: 'Pos Cost', getCellValue: row => getCost(row.price, row.amount) },
-  { name: 'op', title: 'Ord Price' },
-  { name: 'oa', title: 'Ord Amount' },
-  { name: 'oc', title: 'Ord Cost', getCellValue: row => getCost(row.op, row.oa) },
-  { name: 'pl', title: 'P/L' },
-  { name: 'plp', title: 'P/L%' },
 ]
 
 export const getAvgPosition = (orders, maxIndex = orders.length - 1) =>
@@ -83,37 +78,55 @@ export const getAvgPosition = (orders, maxIndex = orders.length - 1) =>
     return getPosition(price, amount, parseFloat(order.op), parseFloat(order.oa))
   }, {})
 
-export const getOrderColumns = rows => [
+export const getOrderColumns = (rows) => [
   {
     name: 'price',
     title: 'Pos Price',
-    getCellValue: row => getAvgPosition(rows, rows.indexOf(row)).price,
+    getCellValue: (row) => getAvgPosition(rows, rows.indexOf(row)).price,
+  },
+  {
+    name: 'price diff',
+    title: 'Pos Price diff',
+    getCellValue: (row) => {
+      const prevPrice = getAvgPosition(rows, rows.indexOf(row) - 1).price
+      const diff = prevPrice - getAvgPosition(rows, rows.indexOf(row)).price
+      const diffPercent = (diff / prevPrice) * 100
+      return `${precision(diff || 0)} (${precision(diffPercent || 0, 2)}%)`
+    },
   },
   {
     name: 'amount',
     title: 'Pos Amount',
-    getCellValue: row => getAvgPosition(rows, rows.indexOf(row)).amount,
+    getCellValue: (row) => getAvgPosition(rows, rows.indexOf(row)).amount,
   },
   {
     name: 'pc',
     title: 'Pos Cost',
-    getCellValue: row => {
+    getCellValue: (row) => {
       const { price, amount } = getAvgPosition(rows, rows.indexOf(row))
       return getCost(price, amount)
     },
   },
   { name: 'op', title: 'Ord Price' },
+  {
+    name: 'opp',
+    title: 'Ord Price diff',
+    getCellValue: (row) => {
+      const { op: prevPrice } = rows[rows.indexOf(row) - 1] || {}
+      const diff = prevPrice - row.op
+      const diffPercent = (diff / prevPrice) * 100
+      return `${precision(diff || 0)} (${precision(diffPercent || 0, 2)}%)`
+    },
+  },
   { name: 'oa', title: 'Ord Amount' },
-  { name: 'oc', title: 'Ord Cost', getCellValue: row => getCost(row.op, row.oa) },
+  { name: 'oc', title: 'Ord Cost', getCellValue: (row) => getCost(row.op, row.oa) },
   {
     name: 'pl',
     title: 'P/L',
-    getCellValue: row => getAvgPosition(rows, rows.indexOf(row)).pl,
-  },
-  {
-    name: 'plp',
-    title: 'P/L%',
-    getCellValue: row => getAvgPosition(rows, rows.indexOf(row)).plp,
+    getCellValue: (row) => {
+      const { pl, plp } = getAvgPosition(rows, rows.indexOf(row))
+      return `${precision(pl, 3)} (${precision(plp, 2)}%)`
+    },
   },
 ]
 
@@ -122,7 +135,6 @@ export const getOrderRows = ({
   entryAmount = 0.001,
   pricePercent = -10,
   xPrice = 0.009,
-  xPositionAmount = 0,
   xAmount = 1.35,
 }) => {
   const rows = []
@@ -134,9 +146,8 @@ export const getOrderRows = ({
   while (price * sign < sign * endPrice) {
     rows.push({ id: _.uniqueId(), op: price, oa: amount })
     const index = rows.length - 1
-    const pos = getAvgPosition(rows, index)
     price = getNextPrice(price, xPrice, sign, index)
-    amount = getNextAmount(parseInt(xPositionAmount) === 1 ? pos.amount : amount, xAmount, index)
+    amount = getNextAmount(amount, xAmount, index)
   }
   return rows
 }
@@ -148,16 +159,16 @@ export const getPlColumns = () => [
   {
     name: 'pl',
     title: 'P/L',
-    getCellValue: row => getPositionPL(row.price, row.exitPrice, row.amount, 0.002),
+    getCellValue: (row) => getPositionPL(row.price, row.exitPrice, row.amount, 0.002),
   },
   {
     name: 'plp',
     title: 'P/L%',
-    getCellValue: row => precision(getPositionPLPercent(row.price, row.exitPrice, row.amount)),
+    getCellValue: (row) => precision(getPositionPLPercent(row.price, row.exitPrice, row.amount)),
   },
 ]
 
-export const getPlRows = orderRows => {
+export const getPlRows = (orderRows) => {
   const pos = getAvgPosition(orderRows)
   return [
     { id: 'exit1', price: pos.price, amount: pos.amount, exitPrice: getPercentPrice(pos.price, 1) },
@@ -166,17 +177,24 @@ export const getPlRows = orderRows => {
   ]
 }
 
-export const getOrders = (symbol, orderRows) => orderRows.map(({ op: price, oa: amount }) => {
-  const data = {
-    type: 'LIMIT',
-    symbol,
-    flags: 0,
-    price: String(price),
-    amount: String(amount),
-  }
-  return `__dispatch(` + JSON.stringify({
-    type: 'WS_REQUEST_SEND',
-    meta: { isPublic: false, throttle: true },
-    payload: JSON.stringify([0, 'on', null, data]),
-  }) + `)`
-}).join('\n')
+export const getOrders = (symbol, orderRows) =>
+  orderRows
+    .map(({ op: price, oa: amount }) => {
+      const data = {
+        type: 'LIMIT',
+        symbol,
+        flags: 0,
+        price: String(price),
+        amount: String(amount),
+      }
+      return (
+        `__dispatch(` +
+        JSON.stringify({
+          type: 'WS_REQUEST_SEND',
+          meta: { isPublic: false, throttle: true },
+          payload: JSON.stringify([0, 'on', null, data]),
+        }) +
+        `)`
+      )
+    })
+    .join('\n')
