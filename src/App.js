@@ -73,7 +73,7 @@ function App() {
       >
         Import Data
       </button>
-      <button onClick={handleCopyOrders}>Get orders</button>
+      <button onClick={handleCopyOrders}>Copy orders</button>
       <TableEdit rows={orderRows} columns={getOrderColumns(orderRows)} onChange={setOrderRows} />
       <center>
         <h3>Profit / Loss</h3>
