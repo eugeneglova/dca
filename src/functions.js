@@ -54,7 +54,10 @@ export const getPercentPrice = (entryPrice, percent) =>
 export const getPricePercent = (price, entryPrice) =>
   precision(((parseFloat(price) - parseFloat(entryPrice)) * 100) / parseFloat(entryPrice))
 
-const getNextPrice = (price, xPrice, sign, index) => precision(price + sign * price * xPrice)
+const getNextPrice = (price, xPrice, sign, index) => {
+  return precision(price + sign * price * xPrice * Math.log10((index + 2) * 1.3))
+  // return precision(price + sign * price * xPrice * Math.pow(index + 1, 1 / 3))
+}
 const getNextAmount = (amount, xAmount, index) => precision(amount * xAmount)
 
 export const getSettingsColumns = () => [
