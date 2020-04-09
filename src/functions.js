@@ -162,12 +162,11 @@ export const getPlColumns = () => [
   {
     name: 'pl',
     title: 'P/L',
-    getCellValue: (row) => getPositionPL(row.price, row.exitPrice, row.amount, 0.002),
-  },
-  {
-    name: 'plp',
-    title: 'P/L%',
-    getCellValue: (row) => precision(getPositionPLPercent(row.price, row.exitPrice, row.amount)),
+    getCellValue: (row) => {
+      const pl = getPositionPL(row.price, row.exitPrice, row.amount, 0.002)
+      const plp = getPositionPLPercent(row.price, row.exitPrice, row.amount)
+      return `${precision(pl, 3)} (${precision(plp, 2)}%)`
+    },
   },
 ]
 
