@@ -56,6 +56,11 @@ function App() {
         onClick={() => {
           const data = JSON.parse(prompt('copy(__state().data)'))
           if (!data) return
+          const plRows = _.filter(
+            data.positions,
+            position => position.status === 'ACTIVE',
+          ).map(({ id, basePrice, amount }) => ({ id, price: basePrice, amount, exitPirce: basePrice }))
+          setPlRows(plRows)
           const positionRows = _.filter(
             data.positions,
             position => position.pair === settings.symbol && position.status === 'ACTIVE',
