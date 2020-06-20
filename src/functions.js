@@ -1,9 +1,14 @@
 import _ from 'lodash'
 
 const getDecimals = (value) => {
-  if (value < 1) return 6
-  if (value < 1000) return 2
-  if (value < 10000) return 1
+  const absValue = Math.abs(value)
+  if (absValue < 0.0005) return 6
+  if (absValue < 0.005) return 5
+  if (absValue < 0.05) return 4
+  if (absValue < 0.5) return 3
+  if (absValue < 1) return 2
+  if (absValue < 1000) return 2
+  if (absValue < 10000) return 1
   return 0
 }
 
