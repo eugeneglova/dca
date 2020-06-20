@@ -15,13 +15,17 @@ import TableEdit from './TableEdit'
 function App() {
   const [settings, setSettings] = useState({
     id: 'settings',
-    symbol: 'tBTCEUR',
-    entryPrice: 6046.3,
+    symbol: 'tBTCF0:USTF0',
+    entryPrice: 9000,
     entryAmount: 0.005,
     pricePercent: -10,
     xPrice: 0.011,
     xPositionAmount: 0,
-    xAmount: 1.2,
+    xAmount: 2,
+    leverage: 25,
+    aff_code: 'Uv2r2svs8',
+    fee: 0.075,
+    log: 1,
   })
   const [orderRows, setOrderRows] = useState(getOrderRows(settings))
   const [plRows, setPlRows] = useState(getPlRows(orderRows))
@@ -33,7 +37,7 @@ function App() {
   const settingsColumns = getSettingsColumns()
 
   const handleCopyOrders = () => {
-    const orders = getOrders(settings.symbol, orderRows)
+    const orders = getOrders(settings, orderRows)
     console.log(orders)
     copy(orders)
   }

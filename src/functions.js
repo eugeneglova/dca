@@ -77,6 +77,10 @@ export const getSettingsColumns = () => [
   },
   { name: 'xPrice', title: 'x Price' },
   { name: 'xAmount', title: 'x Amount' },
+  { name: 'leverage', title: 'Leverage' },
+  { name: 'aff_code', title: 'Ref' },
+  { name: 'fee', title: 'Fee' },
+  { name: 'log', title: 'Log' },
 ]
 
 export const getAvgPosition = (orders, maxIndex = orders.length - 1) =>
@@ -184,15 +188,19 @@ export const getPlRows = (orderRows) => {
   ]
 }
 
-export const getOrders = (symbol, orderRows) =>
+export const getOrders = (settings, orderRows) =>
   orderRows
     .map(({ op: price, oa: amount }) => {
       const data = {
         type: 'LIMIT',
-        symbol,
+        symbol: settings.symbol,
         flags: 0,
         price: String(price),
         amount: String(amount),
+        meta: {
+          lev: settings.leverage ? settings.leverage : undefined,
+          aff_code: settings.aff_code,
+        }
       }
       return (
         `__dispatch(` +
