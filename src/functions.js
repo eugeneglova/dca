@@ -228,7 +228,6 @@ export const getBinanceFuturesOrders = (settings, orderRows) =>
         workingType: null,
         positionSide: amount > 0 ? 'LONG' : 'SHORT',
         price: String(price),
-        reduceOnly: false,
       }
       return (
         `__NEXT_REDUX_STORE__.dispatch(` +
