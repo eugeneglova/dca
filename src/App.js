@@ -9,6 +9,7 @@ import {
   getPlColumns,
   getPlRows,
   getOrders,
+  getBinanceFuturesOrders,
 } from './functions'
 import TableEdit from './TableEdit'
 
@@ -36,8 +37,12 @@ function App() {
 
   const settingsColumns = getSettingsColumns()
 
-  const handleCopyOrders = () => {
-    const orders = getOrders(settings, orderRows)
+  const handleCopyOrders = (exchange) => {
+    const getOrdersFnMap = {
+      'bitfinex': getOrders,
+      'binancefutures': getBinanceFuturesOrders,
+    }
+    const orders = getOrdersFnMap[exchange](settings, orderRows)
     console.log(orders)
     copy(orders)
   }
@@ -82,7 +87,8 @@ function App() {
       >
         Import Data
       </button>
-      <button onClick={handleCopyOrders}>Copy orders</button>
+      <button onClick={() => handleCopyOrders('bitfinex')}>Copy Bitfinex orders</button>
+      <button onClick={() => handleCopyOrders('binancefutures')}>Copy Binance Futures orders</button>
       <TableEdit rows={orderRows} columns={getOrderColumns(orderRows)} onChange={setOrderRows} />
       <center>
         <h3>Profit / Loss</h3>

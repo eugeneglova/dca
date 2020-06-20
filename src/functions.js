@@ -213,3 +213,30 @@ export const getOrders = (settings, orderRows) =>
       )
     })
     .join('\n')
+
+export const getBinanceFuturesOrders = (settings, orderRows) =>
+  orderRows
+    .map(({ op: price, oa: amount }) => {
+      const payload = {
+        symbol: settings.symbol,
+        quantity: Math.abs(amount),
+        type: 'LIMIT',
+        timeInForce: 'GTC',
+        leverage: settings.leverage,
+        side: amount > 0 ? 'BUY' : 'SELL',
+        stopPrice: null,
+        workingType: null,
+        positionSide: amount > 0 ? 'LONG' : 'SHORT',
+        price: String(price),
+        reduceOnly: false,
+      }
+      return (
+        `__NEXT_REDUX_STORE__.dispatch(` +
+        JSON.stringify({
+          type: 'futuresOrderForm/placeOrder',
+          payload,
+        }) +
+        `)`
+      )
+    })
+    .join('\n')
