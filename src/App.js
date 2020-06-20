@@ -82,7 +82,12 @@ function App() {
               order.type === 'LIMIT' &&
               Math.sign(order.amount) === Math.sign(settings.entryAmount),
           ).map(({ id, price, amount }) => ({ id, op: price, oa: amount }))
-          setOrderRows(positionRows.concat(newOrderRows))
+          const newOrderRowsSorted = _.orderBy(
+            newOrderRows,
+            ['op'],
+            [Math.sign(settings.entryAmount) < 0 ? 'asc' : 'desc'],
+          )
+          setOrderRows(positionRows.concat(newOrderRowsSorted))
         }}
       >
         Import Data
