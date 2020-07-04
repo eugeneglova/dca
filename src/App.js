@@ -24,6 +24,7 @@ function App() {
     xPositionAmount: 0,
     xAmount: 2,
     leverage: 25,
+    min_margin: 0.005,
     aff_code: 'Uv2r2svs8',
     fee: 0.075,
     log: 1,
@@ -93,8 +94,8 @@ function App() {
         Import Data
       </button>
       <button onClick={() => handleCopyOrders('bitfinex')}>Copy Bitfinex orders</button>
-      <button onClick={() => handleCopyOrders('binancefutures')}>Copy Binance Futures orders</button>
-      <TableEdit rows={orderRows} columns={getOrderColumns(orderRows)} onChange={setOrderRows} />
+      {/* <button onClick={() => handleCopyOrders('binancefutures')}>Copy Binance Futures orders</button> */}
+      <TableEdit rows={orderRows} columns={getOrderColumns(orderRows, settings)} onChange={setOrderRows} />
       <center>
         <h3>Profit / Loss</h3>
       </center>

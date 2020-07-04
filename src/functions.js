@@ -65,6 +65,10 @@ const getNextPrice = (price, xPrice, sign, index) => {
 }
 const getNextAmount = (amount, xAmount, index) => precision(amount * xAmount)
 
+const getLiqPrice = (price, amount, leverage, min_margin) => (
+  price * (1 + (1 / leverage - min_margin) * Math.sign(amount) * -1)
+)
+
 export const getSettingsColumns = () => [
   { name: 'symbol', title: 'Symbol' },
   { name: 'entryPrice', title: 'Entry Price' },
@@ -78,6 +82,7 @@ export const getSettingsColumns = () => [
   { name: 'xPrice', title: 'x Price' },
   { name: 'xAmount', title: 'x Amount' },
   { name: 'leverage', title: 'Leverage' },
+  { name: 'min_margin', title: 'Min Margin' },
   { name: 'aff_code', title: 'Ref' },
   { name: 'fee', title: 'Fee' },
   { name: 'log', title: 'Log' },
@@ -90,11 +95,20 @@ export const getAvgPosition = (orders, maxIndex = orders.length - 1) =>
     return getPosition(price, amount, parseFloat(order.op), parseFloat(order.oa))
   }, {})
 
-export const getOrderColumns = (rows) => [
+export const getOrderColumns = (rows, settings) => [
   {
     name: 'price',
     title: 'Pos Price',
     getCellValue: (row) => getAvgPosition(rows, rows.indexOf(row)).price,
+  },
+  {
+    name: 'liq_price',
+    title: 'Pos Liq Price',
+    getCellValue: (row) => {
+      const { price, amount } = getAvgPosition(rows, rows.indexOf(row))
+      const liq_price = getLiqPrice(price, amount, settings.leverage, settings.min_margin)
+      return precision(liq_price)
+    },
   },
   {
     name: 'price diff',
@@ -120,6 +134,15 @@ export const getOrderColumns = (rows) => [
     },
   },
   { name: 'op', title: 'Ord Price' },
+  {
+    name: 'oliq_price',
+    title: 'Ord Liq Price',
+    getCellValue: (row) => {
+      const { op, oa } = getAvgPosition(rows, rows.indexOf(row))
+      const liq_price = getLiqPrice(op, oa, settings.leverage, settings.min_margin)
+      return precision(liq_price)
+    },
+  },
   {
     name: 'opp',
     title: 'Ord Price diff',
