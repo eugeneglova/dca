@@ -83,6 +83,7 @@ export const getSettingsColumns = () => [
   },
   { name: 'xPrice', title: 'x Price' },
   { name: 'xAmount', title: 'x Amount' },
+  { name: 'xAmountAfter', title: 'x After' },
   { name: 'leverage', title: 'Leverage' },
   { name: 'min_margin', title: 'Min Margin' },
   { name: 'aff_code', title: 'Ref' },
@@ -173,6 +174,7 @@ export const getOrderRows = ({
   pricePercent = -10,
   xPrice = 0.009,
   xAmount = 1.35,
+  xAmountAfter = 2,
   log = 1,
 }) => {
   const rows = []
@@ -185,7 +187,7 @@ export const getOrderRows = ({
     rows.push({ id: _.uniqueId(), op: price, oa: amount })
     const index = rows.length - 1
     price = getNextPrice(price, xPrice, sign, index, log)
-    amount = getNextAmount(amount, xAmount, index)
+    amount = index + 1 >= xAmountAfter ? getNextAmount(amount, xAmount, index) : amount
   }
   return rows
 }
