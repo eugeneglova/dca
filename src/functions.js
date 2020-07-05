@@ -59,9 +59,11 @@ export const getPercentPrice = (entryPrice, percent) =>
 export const getPricePercent = (price, entryPrice) =>
   precision(((parseFloat(price) - parseFloat(entryPrice)) * 100) / parseFloat(entryPrice))
 
-const getNextPrice = (price, xPrice, sign, index) => {
-  return precision(price + sign * price * xPrice * Math.log10((index + 2) * 1.3))
-  // return precision(price + sign * price * xPrice * Math.pow(index + 1, 1 / 3))
+const getNextPrice = (price, xPrice, sign, index, log) => {
+  return parseFloat(log)
+    ? precision(price + sign * price * xPrice * Math.log10((index + 2) * 1.3))
+    : precision(price + sign * price * xPrice)
+    // : precision(price + sign * price * xPrice * Math.pow(index + 1, 1 / 3))
 }
 const getNextAmount = (amount, xAmount, index) => precision(amount * xAmount)
 
@@ -171,6 +173,7 @@ export const getOrderRows = ({
   pricePercent = -10,
   xPrice = 0.009,
   xAmount = 1.35,
+  log = 1,
 }) => {
   const rows = []
 
@@ -181,7 +184,7 @@ export const getOrderRows = ({
   while (price * sign < sign * endPrice) {
     rows.push({ id: _.uniqueId(), op: price, oa: amount })
     const index = rows.length - 1
-    price = getNextPrice(price, xPrice, sign, index)
+    price = getNextPrice(price, xPrice, sign, index, log)
     amount = getNextAmount(amount, xAmount, index)
   }
   return rows
