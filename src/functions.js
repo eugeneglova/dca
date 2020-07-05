@@ -132,7 +132,7 @@ export const getOrderColumns = (rows, settings) => [
     title: 'Pos Cost',
     getCellValue: (row) => {
       const { price, amount } = getAvgPosition(rows, rows.indexOf(row))
-      return getCost(price, amount)
+      return precision(getCost(price, amount))
     },
   },
   { name: 'op', title: 'Ord Price' },
@@ -156,10 +156,10 @@ export const getOrderColumns = (rows, settings) => [
     },
   },
   { name: 'oa', title: 'Ord Amount' },
-  { name: 'oc', title: 'Ord Cost', getCellValue: (row) => getCost(row.op, row.oa) },
+  { name: 'oc', title: 'Ord Cost', getCellValue: (row) => precision(getCost(row.op, row.oa)) },
   {
     name: 'pl',
-    title: 'P/L',
+    title: 'P/L (%)',
     getCellValue: (row) => {
       const { pl, plp } = getAvgPosition(rows, rows.indexOf(row))
       return `${precision(pl, 3)} (${precision(plp, 2)}%)`
