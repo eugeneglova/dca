@@ -15,7 +15,7 @@ const getDecimals = (value) => {
 export const precision = (value, decimals = getDecimals(value)) =>
   Math.floor(value * 10 ** decimals) / 10 ** decimals
 
-const getCost = (p, a) => precision(p * a)
+const getCost = (p, a) => p * a
 const getPosPrice = (pp, pa, op, oa) => precision((getCost(pp, pa) + getCost(op, oa)) / (pa + oa))
 
 export const getPositionPL = (entryPrice, exitPrice, amount, fee) => {
