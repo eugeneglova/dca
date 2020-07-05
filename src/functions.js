@@ -106,11 +106,12 @@ export const getOrderColumns = (rows, settings) => [
   },
   {
     name: 'liq_price',
-    title: 'Pos Liq Price',
+    title: 'Pos Liq Price (diff)',
     getCellValue: (row) => {
-      const { price, amount } = getAvgPosition(rows, rows.indexOf(row))
+      const { price, amount, op } = getAvgPosition(rows, rows.indexOf(row))
       const liq_price = getLiqPrice(price, amount, settings.leverage, settings.min_margin)
-      return precision(liq_price)
+      const diff = amount > 0 ? op - liq_price : liq_price - op
+      return `${precision(liq_price)} (${precision(diff)})`
     },
   },
   {
