@@ -38,10 +38,10 @@ export const getPositionPLPercent = (entryPrice, exitPrice, amount) => {
   return pl && cost !== 0 ? (pl / cost) * 100 : 0
 }
 
-export const getPosition = (pp, pa, op, oa) => {
+export const getPosition = (pp, pa, op, oa, fee = 0.002) => {
   const p = getPosPrice(pp, pa, op, oa)
   const a = precision(pa + oa)
-  const pl = getPositionPL(p, op, a, 0.002)
+  const pl = getPositionPL(p, op, a, fee)
   const plp = precision(getPositionPLPercent(p, op, a))
   return {
     id: _.uniqueId(),
@@ -87,15 +87,15 @@ export const getSettingsColumns = () => [
   { name: 'leverage', title: 'Leverage' },
   { name: 'min_margin', title: 'Min Margin' },
   { name: 'aff_code', title: 'Ref' },
-  { name: 'fee', title: 'Fee' },
+  { name: 'fee', title: 'Fee %' },
   { name: 'log', title: 'Log10 or Linear' },
 ]
 
-export const getAvgPosition = (orders, maxIndex = orders.length - 1) =>
+export const getAvgPosition = (orders, maxIndex = orders.length - 1, fee) =>
   orders.reduce((acc, order, index) => {
     if (index > maxIndex) return acc
     const { price, amount } = _.isEmpty(acc) ? { price: 0, amount: 0 } : acc
-    return getPosition(price, amount, parseFloat(order.op), parseFloat(order.oa))
+    return getPosition(price, amount, parseFloat(order.op), parseFloat(order.oa), fee)
   }, {})
 
 export const getOrderColumns = (rows, settings) => [
@@ -164,6 +164,14 @@ export const getOrderColumns = (rows, settings) => [
     title: 'P/L (%)',
     getCellValue: (row) => {
       const { pl, plp } = getAvgPosition(rows, rows.indexOf(row))
+      return `${precision(pl, 3)} (${precision(plp, 2)}%)`
+    },
+  },
+  {
+    name: 'pl2',
+    title: 'Fee P/L (%)',
+    getCellValue: (row) => {
+      const { pl, plp } = getAvgPosition(rows, rows.indexOf(row), (settings.fee * 2) / 100)
       return `${precision(pl, 3)} (${precision(plp, 2)}%)`
     },
   },
