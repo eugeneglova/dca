@@ -23,7 +23,7 @@ function App() {
     xPrice: 0.011,
     xPositionAmount: 0,
     xAmount: 2,
-    leverage: 25,
+    leverage: 30,
     min_margin: 0.005,
     aff_code: 'Uv2r2svs8',
     fee: 0.075,
