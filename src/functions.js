@@ -87,7 +87,7 @@ export const getSettingsColumns = () => [
   { name: 'min_margin', title: 'Min Margin' },
   { name: 'aff_code', title: 'Ref' },
   { name: 'fee', title: 'Fee' },
-  { name: 'log', title: 'Log' },
+  { name: 'log', title: 'Log10 or Linear' },
 ]
 
 export const getAvgPosition = (orders, maxIndex = orders.length - 1) =>
